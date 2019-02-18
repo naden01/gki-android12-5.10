@@ -887,7 +887,7 @@ endif
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
 ifdef CONFIG_LTO_CLANG
-KBUILD_LDFLAGS += -O3 --lto-O3 --strip-debug
+KBUILD_LDFLAGS += -O3 --strip-debug
 else
 KBUILD_LDFLAGS += -O3 --strip-debug
 endif
@@ -1029,6 +1029,7 @@ endif
 
 # Set O3 optimization level for LTO
 KBUILD_LDFLAGS		+= --plugin-opt=O3
+KBUILD_LDFLAGS      += --lto-O3
 endif
 
 ifdef CONFIG_LTO
