@@ -414,8 +414,8 @@ SYSCALL_DEFINE2(newlstat, const char __user *, filename,
 	return cp_new_stat(&stat, statbuf);
 }
 
-#if defined(CONFIG_KSU) && !defined(CONFIG_KSU_WITH_KPROBES)
-extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
+#ifdef CONFIG_KSU
+extern __attribute__((hot, always_inline)) int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 #endif
 
 #if !defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_SYS_NEWFSTATAT)
@@ -425,7 +425,7 @@ SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
 	struct kstat stat;
 	int error;
 
-#if defined(CONFIG_KSU) && !defined(CONFIG_KSU_WITH_KPROBES)
+#ifdef CONFIG_KSU
 	ksu_handle_stat(&dfd, &filename, &flag);
 #endif
 	error = vfs_fstatat(dfd, filename, &stat, flag);
@@ -579,8 +579,8 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
 	struct kstat stat;
 	int error;
 
-#if defined(CONFIG_KSU) && defined(CONFIG_COMPAT) && !defined(CONFIG_KSU_WITH_KPROBES)
-	ksu_handle_stat(&dfd, &filename, &flag); /* 32-bit su */
+#ifdef CONFIG_KSU // 32-bit su
+	ksu_handle_stat(&dfd, &filename, &flag); 
 #endif
 	error = vfs_fstatat(dfd, filename, &stat, flag);
 	if (error)
