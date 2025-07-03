@@ -3579,7 +3579,7 @@ static char *custom_module_blacklist[] = {
 #if IS_BUILTIN(CONFIG_USB_NET_AX88179_178A)
     "ax88179_178a",
 #endif
-
+    "mtk_fpsgo", "fpsgo",
 };
 
 static bool blacklisted(const char *module_name)
