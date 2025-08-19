@@ -792,7 +792,25 @@ noinline int slow_avc_audit(struct selinux_state *state,
 
 	a->selinux_audit_data = &sad;
 
-	common_lsm_audit(a, avc_audit_pre_callback, avc_audit_post_callback);
+	/*
+ * Fallback logging path: ensure AVC denials are visible even when
+ * the audit subsystem is disabled or filtered out. This prints once
+ * per event (ratelimited) and mirrors the essential fields normally
+ * emitted by common_lsm_audit().
+ *
+ * We print for both enforcing and permissive so developers can see
+ * what would have been denied. If you only want enforcing-only logs,
+ * gate this on 'result' (nonzero when enforcing deny).
+ */
+if (denied) {
+        pr_warn_ratelimited(
+                "avc: denied { 0x%x } scontext=%u tcontext=%u tclass=%s permissive=%u\n",
+                requested, ssid, tsid,
+                (tclass > 0 && tclass <= ARRAY_SIZE(secclass_map)) ? secclass_map[tclass-1].name : "unknown",
+                result ? 0 : 1);
+}
+
+common_lsm_audit(a, avc_audit_pre_callback, avc_audit_post_callback);
 	return 0;
 }
 
